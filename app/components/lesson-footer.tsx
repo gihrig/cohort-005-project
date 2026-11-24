@@ -73,7 +73,6 @@ function useMarkComplete(
 
   const justCompleted = fetcher.data?.success;
 
-  // Navigate to next lesson after marking complete
   useEffect(() => {
     if (justCompleted && nextLesson) {
       navigate(`/courses/${courseSlug}/lessons/${nextLesson.id}`);
