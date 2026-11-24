@@ -4,8 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { MapPin, ShieldAlert } from "lucide-react";
 import { countryName } from "~/lib/ppp";
-import { LessonBreadcrumb } from "~/components/lesson-breadcrumb";
-import { CurriculumSidebar } from "~/components/lesson-curriculum-sidebar";
+import { LessonLayout } from "~/components/lesson-layout";
 
 type LessonLoaderData = Route.ComponentProps["loaderData"];
 
@@ -17,48 +16,39 @@ export function LockedLesson({
   const purchasePath = `/courses/${course.slug}/purchase`;
 
   return (
-    <div className="flex">
-      <CurriculumSidebar
-        course={course}
-        curriculum={curriculum}
-        currentLessonId={lesson.id}
-        lessonProgressMap={{}}
-        enrolled={enrolled}
-      />
+    <LessonLayout
+      sidebar={{
+        course,
+        curriculum,
+        currentLessonId: lesson.id,
+        lessonProgressMap: {},
+        enrolled,
+      }}
+      breadcrumb={{ course, mod, lessonTitle: lesson.title }}
+    >
+      <h1 className="mb-6 text-3xl font-bold">{lesson.title}</h1>
 
-      <div className="flex-1 p-6 lg:p-8">
-        <LessonBreadcrumb
-          course={course}
-          mod={mod}
-          lessonTitle={lesson.title}
-        />
-
-        <div className="mx-auto max-w-4xl">
-          <h1 className="mb-6 text-3xl font-bold">{lesson.title}</h1>
-
-          <Card className="mb-8">
-            <CardContent className="py-10 text-center">
-              {lockedReason.kind === "country-lock" ? (
-                <CountryLockNotice
-                  courseSlug={course.slug}
-                  purchaseCountry={lockedReason.purchaseCountry}
-                  currentCountry={lockedReason.currentCountry}
-                />
-              ) : (
-                <BuyCourseNotice
-                  courseTitle={course.title}
-                  href={
-                    lockedReason.kind === "signed-out"
-                      ? `/signup?redirectTo=${encodeURIComponent(purchasePath)}`
-                      : purchasePath
-                  }
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
+      <Card className="mb-8">
+        <CardContent className="py-10 text-center">
+          {lockedReason.kind === "country-lock" ? (
+            <CountryLockNotice
+              courseSlug={course.slug}
+              purchaseCountry={lockedReason.purchaseCountry}
+              currentCountry={lockedReason.currentCountry}
+            />
+          ) : (
+            <BuyCourseNotice
+              courseTitle={course.title}
+              href={
+                lockedReason.kind === "signed-out"
+                  ? `/signup?redirectTo=${encodeURIComponent(purchasePath)}`
+                  : purchasePath
+              }
+            />
+          )}
+        </CardContent>
+      </Card>
+    </LessonLayout>
   );
 }
 
