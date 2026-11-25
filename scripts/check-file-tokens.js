@@ -1,7 +1,13 @@
 // Fails when a file is too big for an agent to read and edit in one go.
 // Tokens are estimated as bytes / 4, which is close enough for code.
 // Usage: node scripts/check-file-tokens.js <file>...
+//
+// A file that was already over the limit at HEAD passes while it does not
+// grow. Without this, any edit to one of those files forced a split of the
+// whole file into an unrelated change. Split those files in their own
+// changes instead.
 
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const MAX_TOKENS = 5000;
@@ -17,6 +23,26 @@ const IGNORED = [
 
 const isBinary = (contents) => contents.subarray(0, 8000).includes(0);
 
+const tokensOf = (bytes) => Math.ceil(bytes / BYTES_PER_TOKEN);
+
+// The file's size in bytes at HEAD, or null when HEAD does not have it.
+const bytesAtHead = (file) => {
+  try {
+    const size = execFileSync("git", ["cat-file", "-s", `HEAD:${file}`], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return Number(size.trim());
+  } catch {
+    return null;
+  }
+};
+
+const isOldOversizedAndNotGrowing = ({ file, bytes }) => {
+  const before = bytesAtHead(file);
+  return before !== null && tokensOf(before) > MAX_TOKENS && bytes <= before;
+};
+
 const oversized = process.argv
   .slice(2)
   .map((file) => file.replaceAll("\\", "/").replace(`${process.cwd()}/`, ""))
@@ -25,9 +51,11 @@ const oversized = process.argv
   .filter(({ contents }) => !isBinary(contents))
   .map(({ file, contents }) => ({
     file,
-    tokens: Math.ceil(contents.length / BYTES_PER_TOKEN),
+    bytes: contents.length,
+    tokens: tokensOf(contents.length),
   }))
-  .filter(({ tokens }) => tokens > MAX_TOKENS);
+  .filter(({ tokens }) => tokens > MAX_TOKENS)
+  .filter((entry) => !isOldOversizedAndNotGrowing(entry));
 
 if (oversized.length > 0) {
   console.error(`These files are over ${MAX_TOKENS} tokens (bytes / 4):\n`);
@@ -37,6 +65,10 @@ if (oversized.length > 0) {
   console.error(`
 Split each file before you commit. Do not delete code or squash it onto fewer
 lines to get under the limit.
+
+A file that was already over the limit at HEAD passes only when it does not
+grow. If your change must make such a file bigger, split the file first, in its
+own commit that only moves code.
 
 How to split:
 - Find the seams. Look for groups of functions, components, or tests that

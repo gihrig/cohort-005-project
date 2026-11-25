@@ -12,6 +12,9 @@ npm install -g agent-browser
 agent-browser install
 ```
 
+The factory workflows in `.github/workflows/` install it before the agent
+starts.
+
 ## Asking your own question
 
 Start the app with `npm run dev` first. The examples below use
@@ -51,6 +54,30 @@ change you are reporting on trust.
 
 Screenshots are PR evidence: a before and an after for a change that shows in
 the UI.
+
+## Signing in
+
+The app has no login form in development. Sign in by posting to
+`/api/switch-user` from the page, then open the page you want:
+
+```bash
+agent-browser open http://localhost:5173/
+agent-browser eval "fetch('/api/switch-user', {method: 'POST', body: new URLSearchParams({userId: '5'})}).then(r => r.status)"
+agent-browser open http://localhost:5173/courses/introduction-to-typescript/lessons/18
+```
+
+`npm run db:seed` is deterministic, so these IDs are the same on every
+machine and in CI:
+
+| Who                                                  | `userId` |
+| ---------------------------------------------------- | -------- |
+| Admin (Alex Rivera)                                  | 1        |
+| Instructor (Sarah Chen)                              | 2        |
+| Student enrolled in `introduction-to-typescript`     | 5        |
+| Student not enrolled in `introduction-to-typescript` | 10       |
+
+In `introduction-to-typescript`, lesson 3 has a quiz (quiz 1), and lesson 18
+has no quiz.
 
 ## Two things that will bite you
 

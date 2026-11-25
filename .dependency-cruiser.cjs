@@ -23,6 +23,42 @@ const R = PACKAGES_ROOT;
  */
 const PACKAGE_INTERNALS = `^${R}/[^/]+/[^/]+/`;
 
+/**
+ * Routes that queried the database before the `routes-no-db` rule. The list
+ * only shrinks: take a route off once a module serves its data.
+ */
+const ROUTES_THAT_QUERY_THE_DB = [
+  "^app/routes/admin\\.categories\\.tsx$",
+  "^app/routes/admin\\.courses\\.tsx$",
+  "^app/routes/admin\\.refunds\\.tsx$",
+  "^app/routes/admin\\.users\\.tsx$",
+  "^app/routes/api\\.video\\-tracking\\.ts$",
+  "^app/routes/courses\\.\\$slug\\.\\$moduleId\\.tsx$",
+  "^app/routes/courses\\.\\$slug\\.lessons\\.\\$lessonId\\.tsx$",
+  "^app/routes/courses\\.\\$slug\\.purchase\\.tsx$",
+  "^app/routes/courses\\.\\$slug\\.refund\\.ts$",
+  "^app/routes/courses\\.\\$slug\\.tsx$",
+  "^app/routes/courses\\.\\$slug\\.welcome\\.tsx$",
+  "^app/routes/courses\\.tsx$",
+  "^app/routes/dashboard\\.tsx$",
+  "^app/routes/home\\.tsx$",
+  "^app/routes/instructor\\.\\$courseId\\.lessons\\.\\$lessonId\\.quiz\\.tsx$",
+  "^app/routes/instructor\\.\\$courseId\\.lessons\\.\\$lessonId\\.tsx$",
+  "^app/routes/instructor\\.\\$courseId\\.modules\\.\\$moduleId\\.tsx$",
+  "^app/routes/instructor\\.\\$courseId\\.students\\.tsx$",
+  "^app/routes/instructor\\.\\$courseId\\.tsx$",
+  "^app/routes/instructor\\.new\\.tsx$",
+  "^app/routes/instructor\\.questions\\.tsx$",
+  "^app/routes/instructor\\.tsx$",
+  "^app/routes/layout\\.app\\.tsx$",
+  "^app/routes/login\\.tsx$",
+  "^app/routes/redeem\\.\\$code\\.tsx$",
+  "^app/routes/saved\\.tsx$",
+  "^app/routes/settings\\.tsx$",
+  "^app/routes/signup\\.tsx$",
+  "^app/routes/team\\.tsx$",
+];
+
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
@@ -87,11 +123,19 @@ module.exports = {
     // },
 
     {
-      name: "instructor-analytics-route-no-db",
+      name: "module-internals-take-db-as-argument",
       comment:
-        "The instructor analytics route gets its data from the instructor-analytics module, never by querying the database itself.",
+        "A module's lib/ and tests/ take the database as an argument. Only an entry point opens the app's connection (`~/db`) and passes it in, so tests can pass a test database instead of mocking `~/db`. See instructor-analytics/index.server.ts.",
       severity: "error",
-      from: { path: "^app/routes/instructor\\.analytics\\.tsx$" },
+      from: { path: PACKAGE_INTERNALS },
+      to: { path: "^app/db/index\\.ts$" },
+    },
+    {
+      name: "routes-no-db",
+      comment:
+        "A route gets its data from a module, never by querying the database itself. The routes in ROUTES_THAT_QUERY_THE_DB did so before this rule; move their queries into modules and take them off the list.",
+      severity: "error",
+      from: { path: "^app/routes/", pathNot: ROUTES_THAT_QUERY_THE_DB },
       to: { path: ["^app/db/", "^node_modules/(drizzle-orm|better-sqlite3)/"] },
     },
     {
