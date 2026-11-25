@@ -19,11 +19,13 @@ Copy `example/` to start a new module.
 
 ## The rules
 
-Enforced by dependency-cruiser (`.dependency-cruiser.cjs`). Run `npm run lint:boundaries`, or `npm run check` for typecheck + boundaries + tests.
+Enforced by dependency-cruiser (`.dependency-cruiser.cjs`) and `scripts/check-module-layout.js`. Run `npm run lint:boundaries`, or `npm run check` for typecheck + boundaries + tests.
 
 1. **Entry-point boundary.** Code outside a module (routes, `app/lib`, other modules) imports only that module's root files, never anything in its subfolders.
 2. **Intra-module freedom.** A module's own files import each other freely.
 3. **Tests through the entry points.** Files in `<module>/tests/` import any module's entry points and their own `tests/` fixtures, never any module's subfolder internals, not even their own. Nothing outside `tests/` may import from it.
 4. **No cycles.** No dependency cycles anywhere in `app/`.
+5. **The database comes in as an argument.** Files in `lib/` and `tests/` never import `~/db`. An entry point opens the app's connection and passes it in, as `instructor-analytics/index.server.ts` does.
+6. **Every module has `lib/` and a test.** `scripts/check-module-layout.js` checks this, as part of `npm run lint:boundaries`.
 
 Modules are flat: one level of folders under `app/modules/`. A module may not contain another module.

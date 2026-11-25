@@ -32,8 +32,9 @@ Once a module owns a feature's data, the route asks the module for it and
 does not import `~/db` or `drizzle-orm` itself. The instructor analytics
 route gets everything from `instructorAnalytics`. A query in the loader
 splits the feature's rules across two files, and the module's tests stop
-covering what the page shows. `npm run lint:boundaries` enforces this for the
-instructor analytics route only; apply it to every other module by hand. See
+covering what the page shows. `npm run lint:boundaries` enforces this for
+every route except the old ones in `ROUTES_THAT_QUERY_THE_DB`
+(`.dependency-cruiser.cjs`); apply it to those by hand. See
 [app/modules/README.md](./app/modules/README.md).
 
 ## Arrange tests through the module under test
@@ -41,6 +42,14 @@ instructor analytics route only; apply it to every other module by hand. See
 Test setup calls the module's own functions. When the function you need does
 not exist, add it to the module rather than inserting rows directly, so a
 change to how the module stores its data leaves its tests alone.
+
+## A move carries its old breaches
+
+A change that only moves code does not have to fix the rules that code
+already broke. Report them as one finding that names the moved files and the
+rules, not one finding per breach, and fix them in a follow-up ticket once
+the code has tests. A breach on a line the change wrote or edited is new, and
+gets its own finding.
 
 ## Keep files under 5000 tokens
 

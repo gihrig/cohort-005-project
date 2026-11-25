@@ -15,6 +15,9 @@ Read CODING_STANDARDS.md.
 - The review workflow checks you against the ticket's "Done when". Reread it
   before you stop.
 - `npm run build` must pass too.
+- After `npm run test:mutation`, read the survivors with the mutation-testing
+  skill, .agents/skills/mutation-testing/SKILL.md. One run per change is
+  enough: the skill reads its report.
 - Commit with `git commit` on the current branch. When the pre-commit hook
   rejects a commit, fix the work and commit again. The hook stays as it is:
   no `--no-verify`, no edits to `.husky/`, `scripts/pre-commit.sh` or

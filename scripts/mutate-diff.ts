@@ -92,8 +92,16 @@ function git(args: string[], { optional = false } = {}): string[] {
  * If not, it is the merge base with `origin/main`, then with `main`. A clone
  * with neither gets null. The script then examines only the uncommitted
  * changes, which is still a usable result.
+ *
+ * When `MUTATE_DIFF_BASE` names a ref, the base is the merge base with it, and
+ * the reflog is ignored. The review workflow sets it: its `git checkout -B` at
+ * the pull request's head starts the reflog there, so the diff would hold only
+ * the review's own commits.
  */
 function findDiffBase(): string | null {
+  const pinned = process.env.MUTATE_DIFF_BASE;
+  if (pinned) return git(["merge-base", "HEAD", pinned])[0] ?? null;
+
   const branch = git(["symbolic-ref", "--quiet", "--short", "HEAD"], {
     optional: true,
   })[0];

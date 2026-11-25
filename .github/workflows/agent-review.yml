@@ -96,6 +96,9 @@ jobs:
       # Where the fixes go if the push to BRANCH is rejected. New every run.
       FALLBACK_BRANCH: ${{ github.event.pull_request.head.ref }}-${{ github.run_id }}
       BASE_REF: ${{ github.event.pull_request.base.ref }}
+      # `npm run test:mutation` grades the whole pull request, not only the
+      # review's own commits. See findDiffBase in scripts/mutate-diff.ts.
+      MUTATE_DIFF_BASE: origin/${{ github.event.pull_request.base.ref }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
@@ -162,6 +165,13 @@ jobs:
 
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install agent-browser
+        # The agent drives the app with it for screenshots and checks. See
+        # docs/agents/agent-browser.md.
+        run: |
+          npm install -g agent-browser@0.44.0
+          agent-browser install
 
       - name: Migrate and seed the database
         # The pre-commit hook runs on every commit the agent makes, and the
