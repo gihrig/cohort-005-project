@@ -179,7 +179,6 @@ export function computeResult(
   }
 }
 
-/** The answers stored for one attempt, in the order they were given. */
 export function getAttemptAnswers(db: Db, attemptId: number) {
   return db
     .select({
