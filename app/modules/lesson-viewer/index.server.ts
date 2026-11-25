@@ -22,6 +22,7 @@ import {
 } from "./lib/lesson-thread";
 import {
   computeResult,
+  getAttemptAnswers,
   getBestAttempt,
   getQuizById,
   getQuizByLessonId,
@@ -74,6 +75,8 @@ export function createLessonViewer(database: Db) {
       getQuizWithQuestions(database, quizId),
     getBestAttempt: (userId: number, quizId: number) =>
       getBestAttempt(database, userId, quizId),
+    getAttemptAnswers: (attemptId: number) =>
+      getAttemptAnswers(database, attemptId),
     computeResult: (
       userId: number,
       quizId: number,

@@ -1,6 +1,4 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
-import { eq } from "drizzle-orm";
-import * as schema from "~/db/schema";
 import { QuestionType } from "~/db/schema";
 import {
   addLesson,
@@ -25,18 +23,6 @@ function setupWithQuiz() {
   });
   const quiz = addQuiz(fixture.db, { lessonId: lesson.id, title: "Check" });
   return { ...fixture, lesson, quiz };
-}
-
-function answersOf(
-  db: ReturnType<typeof setup>["db"],
-  attemptId: number
-): Array<[number, number]> {
-  return db
-    .select()
-    .from(schema.quizAnswers)
-    .where(eq(schema.quizAnswers.attemptId, attemptId))
-    .all()
-    .map((a) => [a.questionId, a.selectedOptionId]);
 }
 
 afterEach(() => {
@@ -181,10 +167,10 @@ describe("computeResult", () => {
       score: 0.5,
       passed: false,
     });
-    expect(answersOf(db, attempt?.id ?? 0)).toEqual([
-      [mc.question.id, mc.options[2].id],
-      [tf.question.id, tf.options[1].id],
-      [wrong.question.id, wrong.options[1].id],
+    expect(viewer.getAttemptAnswers(attempt?.id ?? 0)).toEqual([
+      { questionId: mc.question.id, selectedOptionId: mc.options[2].id },
+      { questionId: tf.question.id, selectedOptionId: tf.options[1].id },
+      { questionId: wrong.question.id, selectedOptionId: wrong.options[1].id },
     ]);
   });
 
@@ -240,7 +226,7 @@ describe("computeResult", () => {
     expect(logged).toHaveBeenCalledWith("quiz not found");
   });
 
-  it("returns null when an answer cannot be stored", () => {
+  it("records no attempt when an answer cannot be stored", () => {
     const { db, viewer, user, quiz } = setupWithQuiz();
     const q = addQuestion(db, {
       quizId: quiz.id,
@@ -253,5 +239,6 @@ describe("computeResult", () => {
       viewer.computeResult(user.id, quiz.id, { [q.question.id]: 9999 })
     ).toBeNull();
     expect(logged).toHaveBeenCalledWith(expect.any(Error));
+    expect(viewer.getBestAttempt(user.id, quiz.id)).toBeUndefined();
   });
 });

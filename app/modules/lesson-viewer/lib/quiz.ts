@@ -138,28 +138,31 @@ export function computeResult(
     const passed = scoreValue > 0.7;
     const grade = calculateGrade(scoreValue);
 
-    const attempt = db
-      .insert(quizAttempts)
-      .values({
-        userId,
-        quizId,
-        score: scoreValue,
-        passed,
-      })
-      .returning()
-      .get();
+    const attempt = db.transaction((tx) => {
+      const inserted = tx
+        .insert(quizAttempts)
+        .values({
+          userId,
+          quizId,
+          score: scoreValue,
+          passed,
+        })
+        .returning()
+        .get();
 
-    for (const result of questionResults) {
-      if (result.selectedOptionId !== null) {
-        db.insert(quizAnswers)
-          .values({
-            attemptId: attempt.id,
-            questionId: result.questionId,
-            selectedOptionId: result.selectedOptionId,
-          })
-          .run();
+      for (const result of questionResults) {
+        if (result.selectedOptionId !== null) {
+          tx.insert(quizAnswers)
+            .values({
+              attemptId: inserted.id,
+              questionId: result.questionId,
+              selectedOptionId: result.selectedOptionId,
+            })
+            .run();
+        }
       }
-    }
+      return inserted;
+    });
 
     return {
       attemptId: attempt.id,
@@ -174,6 +177,19 @@ export function computeResult(
     console.error(error);
     return null;
   }
+}
+
+/** The answers stored for one attempt, in the order they were given. */
+export function getAttemptAnswers(db: Db, attemptId: number) {
+  return db
+    .select({
+      questionId: quizAnswers.questionId,
+      selectedOptionId: quizAnswers.selectedOptionId,
+    })
+    .from(quizAnswers)
+    .where(eq(quizAnswers.attemptId, attemptId))
+    .orderBy(quizAnswers.id)
+    .all();
 }
 
 export function getQuizById(db: Db, quizId: number) {

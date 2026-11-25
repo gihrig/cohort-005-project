@@ -8,7 +8,7 @@ import {
   UserRole,
 } from "~/db/schema";
 import { renderComment } from "~/lib/comment-markdown.server";
-import type { RenderedComment } from "~/components/comment-thread";
+import type { RenderedComment } from "~/lib/comment-types";
 import { markdown, type Markdown } from "~/lib/text";
 import type { Db } from "./db";
 
