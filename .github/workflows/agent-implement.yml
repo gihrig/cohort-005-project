@@ -114,6 +114,23 @@ jobs:
           gh issue edit "$ISSUE_NUMBER" --remove-label "agent:blocked" || true
           gh issue edit "$ISSUE_NUMBER" --add-label "agent:in-progress"
 
+      - name: Stop if a blocker is open
+        # A ticket's GitHub "blocked by" issues must close first. Its code is
+        # not on main yet, so building now would build on the wrong base.
+        id: blockers
+        env:
+          GH_TOKEN: ${{ secrets.FACTORY_PAT }}
+        run: |
+          set -euo pipefail
+          open="$(gh api --paginate \
+            "repos/$GH_REPO/issues/$ISSUE_NUMBER/dependencies/blocked_by" \
+            --jq '.[] | select(.state == "open") | "#\(.number)"' | paste -sd' ' -)"
+          if [ -n "$open" ]; then
+            echo "open=$open" >> "$GITHUB_OUTPUT"
+            echo "::error::Issue #$ISSUE_NUMBER is blocked by open issues: $open. Close them first."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -277,11 +294,13 @@ jobs:
           GH_TOKEN: ${{ secrets.FACTORY_PAT }}
           JOB_STATUS: ${{ job.status }}
           PR_URL: ${{ steps.pr.outputs.url }}
+          OPEN_BLOCKERS: ${{ steps.blockers.outputs.open }}
         run: |
           where=""
           [ -n "$PR_URL" ] && where=" Pull request: ${PR_URL}, from \`${BRANCH}\`."
           retry=""
           [ "$JOB_STATUS" = "failure" ] && retry=" Re-add \`agent:implement\` to retry."
+          [ -n "$OPEN_BLOCKERS" ] && retry=" Blocked by ${OPEN_BLOCKERS}. Re-add \`agent:implement\` once they are closed."
           # Tagged, so the next run on this ticket leaves it out of the ticket.
           gh issue comment "$ISSUE_NUMBER" --body \
             "Implementer run **${JOB_STATUS}** — [logs](${RUN_URL}).${where}${retry} <!-- factory:status -->"
