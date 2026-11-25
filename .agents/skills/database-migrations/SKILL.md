@@ -16,7 +16,7 @@ Disposable is also why `scripts/seed.ts` is part of every schema change rather t
 2. **Generate the migration** — `npm run db:generate`. This writes a new numbered SQL file into `drizzle/`. Read it and confirm it says what you intended.
 
 3. **Update the seed** for every table you touched. `scripts/seed.ts` drops and migrates; the inserts live in `scripts/seed/`, one file per step, run in order by `scripts/seed/seed-database.ts`:
-   - **New table** — add a `DROP TABLE IF EXISTS` line to the drop block at the top of `seed()` in `scripts/seed.ts`, positioned above the tables it has foreign keys into (children drop first), and insert rows for it.
+   - **New table** — add a `DROP TABLE IF EXISTS` line to the drop block at the top of `seed()` in `scripts/seed.ts`, positioned above the tables it has foreign keys into (children drop first). Insert its rows in a new step file in `scripts/seed/` and call it from `seedDatabase` after the steps whose rows it references; add it last otherwise, because moving a step changes every autoincrement id and PRNG roll after it.
    - **New non-nullable column** — give it a value in every `.values({ ... })` call for that table.
    - **Renamed or removed column** — rename or remove it at every insert site for that table.
    - **New enum** — import it from `../../app/db/schema` and use its members at the insert sites, matching how `UserRole` and `CourseStatus` are used.
