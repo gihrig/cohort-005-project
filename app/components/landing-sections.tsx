@@ -15,6 +15,7 @@ import {
   CardHeader,
 } from "~/components/ui/card";
 import { CourseImage } from "~/components/course-image";
+import { cn } from "~/lib/utils";
 import type { CatalogueStats, FeaturedCourse } from "~/modules/landing-page";
 
 function plural(count: number, one: string, many: string) {
@@ -36,39 +37,52 @@ export function LandingHero({
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 size-[36rem] rounded-full bg-primary/5 blur-3xl"
       />
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-[1.15fr_1fr] lg:py-28">
+      <div
+        className={cn(
+          "relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:py-28",
+          spotlight && "lg:grid-cols-[1.15fr_1fr]"
+        )}
+      >
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-primary" />
-            Self-paced courses for developers
-          </p>
-          <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
-            Learn to code,
-            <br />
-            <span className="text-muted-foreground">at your own pace.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Structured courses built by experienced instructors. Watch the
-            lessons, take the quizzes, and pick up exactly where you left off.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Button asChild size="lg">
-              <Link to="/courses">
-                Browse courses
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to={signedIn ? "/dashboard" : "/signup"}>
-                {signedIn ? "Go to your dashboard" : "Create a free account"}
-              </Link>
-            </Button>
-          </div>
-          <CatalogueStatList stats={stats} />
+          <HeroHeadline signedIn={signedIn} />
+          {stats.courses > 0 && <CatalogueStatList stats={stats} />}
         </div>
         {spotlight && <SpotlightCourse course={spotlight} />}
       </div>
     </section>
+  );
+}
+
+function HeroHeadline({ signedIn }: { signedIn: boolean }) {
+  return (
+    <>
+      <p className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+        <span className="size-1.5 rounded-full bg-primary" />
+        Self-paced courses for developers
+      </p>
+      <h1 className="mt-6 text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+        Learn to code,
+        <br />
+        <span className="text-muted-foreground">at your own pace.</span>
+      </h1>
+      <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+        Structured courses built by experienced instructors. Watch the lessons,
+        take the quizzes, and pick up exactly where you left off.
+      </p>
+      <div className="mt-10 flex flex-wrap items-center gap-3">
+        <Button asChild size="lg">
+          <Link to="/courses">
+            Browse courses
+            <ArrowRight className="ml-2 size-4" />
+          </Link>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link to={signedIn ? "/dashboard" : "/signup"}>
+            {signedIn ? "Go to your dashboard" : "Create a free account"}
+          </Link>
+        </Button>
+      </div>
+    </>
   );
 }
 
