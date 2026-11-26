@@ -60,6 +60,37 @@ rules, not one finding per breach, and fix them in a follow-up ticket once
 the code has tests. A breach on a line the change wrote or edited is new, and
 gets its own finding.
 
+## A ticket about looks changes only the looks
+
+A ticket that says a page looks wrong may change behaviour only when the new
+look cannot work without it. A new module is fine if the behaviour in it
+passes that test. Leave any other behaviour change out, file it as a new
+ticket, and link that ticket under "Left out on purpose". On #21, a ticket
+about how the notes card looked also turned off Save for an unchanged note.
+A Student could no longer save again to move "last edited" forward.
+
+## List each behaviour change in the PR body
+
+A PR that changes what a user can do has a `## Behaviour changes` heading.
+Each change is one bullet that says what happened before and what happens
+now. On #21 the Save change was in "Blast Radius", where a product owner
+could miss it.
+
+This rule is not effective yet. These factory files override it:
+`.agents/skills/pr/SKILL.md:15`
+`.sandcastle/agent-workflows/implement/prompt.md:27`
+These can be updated in later projects after Cohort-005.
+
+## Reuse a block before you copy its look
+
+If a change makes one block look like another, share the block. A block is
+a part with its own job, such as a header, a footer or a card. One repeated
+class list is not a block. If the source block can be extracted with no
+change to how it looks or behaves, extracting it is in scope. If not, copy
+it, name the copy in the PR body, and file a follow-up ticket. An old copy
+is not a breach until a change edits that block. On #21 the notes footer
+copied the comment form's footer by hand, so the two can drift apart.
+
 ## Keep files under 5000 tokens
 
 Keep every file under 5000 tokens.
