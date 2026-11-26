@@ -7,7 +7,7 @@ const { categories, courses, lessons, modules, users } = schema;
 
 export type Db = BetterSQLite3Database<typeof schema>;
 
-export const FEATURED_COURSE_LIMIT = 4;
+const FEATURED_COURSE_LIMIT = 4;
 
 export type FeaturedCourse = {
   id: number;

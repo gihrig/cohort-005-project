@@ -1,8 +1,6 @@
 import { db } from "~/db";
 import { getLandingPage, type Db } from "./lib/landing-page";
 
-export { FEATURED_COURSE_LIMIT } from "./lib/landing-page";
-
 /**
  * The landing page's data bound to a database. The app uses `landingPage`;
  * tests build their own against a test database.

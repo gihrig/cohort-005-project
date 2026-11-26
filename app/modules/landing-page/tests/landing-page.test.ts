@@ -3,7 +3,7 @@ import { createTestDb, seedBaseData, type TestDb } from "~/test/setup";
 import * as schema from "~/db/schema";
 import { CourseStatus, UserRole } from "~/db/schema";
 import { markdown } from "~/lib/text";
-import { createLandingPage, FEATURED_COURSE_LIMIT } from "../index.server";
+import { createLandingPage } from "../index.server";
 
 let db: TestDb;
 let base: ReturnType<typeof seedBaseData>;
@@ -134,7 +134,6 @@ describe("featured courses", () => {
     addCourse("Newest", { createdAt: "2031-01-01T00:00:00.000Z" });
     addCourse("Newer", { createdAt: "2030-06-01T00:00:00.000Z" });
 
-    expect(FEATURED_COURSE_LIMIT).toBe(4);
     expect(landing().featuredCourses.map((c) => c.title)).toEqual([
       "Newest",
       "Newer",
