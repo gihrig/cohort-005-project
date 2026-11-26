@@ -122,3 +122,21 @@ Name and extract until a comment is unnecessary. A comment earns its place
 only for a _why_ the code cannot express: a constraint, a decision, a link to
 the ADR behind it. A comment that restates _what_ the code does goes stale the
 first time the code changes.
+
+## Show each screenshot once
+
+Take a screenshot only of a change that shows in the UI. The before
+screenshot goes in the issue, because the issue describes the page as it is
+now. The PR body holds the after screenshot and links to the issue for the
+before. A later step, such as a review, adds a screenshot only when the page
+changed after the previous one. PR #21 had an after screenshot in its body and
+two more of the same card in the review verdict.
+
+For this rule is not effective. It will be overridden by factory system files:
+`.sandcastle/agent-workflows/implement/prompt.md:24`
+`.sandcastle/agent-workflows/implement-spec/build-prompt.md:29`
+`.sandcastle/agent-workflows/review/prompt.md:39`
+`.agents/skills/pr/SKILL.md:21`
+`docs/agents/agent-browser.md:55`
+`.sandcastle/agent-workflows/explore/prompt.md:28`
+These can be updated in later projects after Cohort-005
