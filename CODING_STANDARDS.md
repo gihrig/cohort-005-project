@@ -43,6 +43,15 @@ Test setup calls the module's own functions. When the function you need does
 not exist, add it to the module rather than inserting rows directly, so a
 change to how the module stores its data leaves its tests alone.
 
+One exception: when no module has a function that writes the rows a test
+needs, the test may insert them. Put the inserts in named helpers at the top
+of the test file, such as `addCourse`, with a comment that names the missing
+writer. The change that adds that writer replaces the inserts in every test.
+The `landing-page` tests (#32) need courses, and no module writes them yet.
+
+The rule applies to every test. The direct inserts in `app/lib` tests are old
+breaches. A change that edits one of those files does not have to fix them.
+
 ## A move carries its old breaches
 
 A change that only moves code does not have to fix the rules that code
@@ -115,6 +124,29 @@ const [count, setCount] = useState(rows.length);
 const [items, setItems] = useState(rows);
 const count = items.length;
 ```
+
+## A screen reader hears each thing once, and every control has a name
+
+A screen reader reads each piece of text once. Every button, link and input
+has an accessible name. If a change edits markup, check the page with
+`agent-browser snapshot`, not only the diff. On #32 each stat had an
+`sr-only` label and a visible label with the same text, so it was read twice.
+
+## Design the empty state
+
+A page that shows stored data has a state for no data. Hide or replace a
+count of zero. Collapse a layout column that has nothing in it. Give an empty
+list a message that says what to do next. Put the no-data decision in module
+code, and test it with no rows. On #32 an empty catalogue showed "0 courses /
+0 lessons / 0 instructors / 0 topics" next to an empty column.
+
+## Write UI text in sentence case
+
+Buttons, links, headings and page titles capitalise only the first word and
+proper names: "Browse courses", not "Browse Courses". A term from
+`GLOSSARY.md` keeps its capitals: "Refund Requests". Old title-case text is
+not a breach until a change edits that line. On #32 the header said "Log In"
+next to a page that said "Sign up".
 
 ## A comment explains why
 
