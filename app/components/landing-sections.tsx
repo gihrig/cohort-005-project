@@ -89,10 +89,9 @@ function CatalogueStatList({ stats }: { stats: CatalogueStats }) {
   return (
     <dl className="mt-14 grid max-w-xl grid-cols-2 gap-6 border-t border-border pt-8 sm:grid-cols-4">
       {statTiles.map((tile) => (
-        <div key={tile.label}>
-          <dt className="sr-only">{tile.label}</dt>
+        <div key={tile.label} className="flex flex-col-reverse">
+          <dt className="mt-1 text-sm text-muted-foreground">{tile.label}</dt>
           <dd className="text-3xl font-bold tracking-tight">{tile.value}</dd>
-          <dd className="mt-1 text-sm text-muted-foreground">{tile.label}</dd>
         </div>
       ))}
     </dl>
